@@ -3,33 +3,38 @@ import 'package:jalees/features/quran/model/quran_model.dart';
 import '../screens/ayat_screen.dart';
 
 class SuraCard extends StatelessWidget {
-  const SuraCard({super.key, required this.surahs});
+  const SuraCard({super.key, required this.sura});
 
-  final List<QuranSurah> surahs;
+  final QuranSurah sura;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: surahs.length,
-      itemBuilder: (context, index) {
-        final surah = surahs[index];
-        return ListTile(
-          title: Text(surah.name),
-          subtitle: Row(
-            children: [
-              Text('عدد الآيات: ${surah.totalVerses}'),
-              const SizedBox(width: 10),
-              Text('النوع: ${surah.type == "meccan" ? "مكية" : "مدنية"}'),
-            ],
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          child: Text(
+            sura.id.toString(),
+            style: const TextStyle(color: Colors.white),
           ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AyatScreen(surah: surah)),
-            );
-          },
-        );
-      },
+        ),
+        title: Text(
+          sura.name,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        subtitle: Text(
+          'الآيات: ${sura.totalVerses} | النوع: ${sura.type == "meccan" ? "مكية" : "مدنية"}',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        trailing: Icon(Icons.arrow_forward_ios, color: Theme.of(context).colorScheme.primary),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AyatScreen(surah: sura)),
+          );
+        },
+      ),
     );
   }
 }

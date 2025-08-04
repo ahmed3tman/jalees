@@ -93,11 +93,11 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
             child: Container(
               height: 65,
               decoration: BoxDecoration(
-                color: Colors.blue[700],
+                color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                     spreadRadius: 0,
@@ -108,27 +108,15 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
                 controller: _tabController,
                 onTap: _onTabTapped,
                 indicator: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.white70,
+                labelColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
+                unselectedLabelColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
                 indicatorSize: TabBarIndicatorSize.tab,
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 dividerColor: Colors.transparent,
-                labelStyle: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'NeoSansArabic',
-                  color: Colors.white,
-                ),
-                unselectedLabelStyle: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: 'NeoSansArabic',
-                  color: Colors.white70,
-                ),
                 tabs: const [
                   Tab(icon: Icon(Icons.menu_book, size: 22), text: 'القرآن'),
                   Tab(

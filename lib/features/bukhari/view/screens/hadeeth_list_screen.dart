@@ -16,10 +16,16 @@ class HadithsListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(chapter.arabic, textDirection: TextDirection.rtl),
+        centerTitle: true,
       ),
       body: hadiths.isEmpty
           ? const Center(child: Text('لا يوجد أحاديث في هذا الكتاب'))
-          : HadeethListCard(hadiths: hadiths),
+          : ListView.builder(
+              itemCount: hadiths.length,
+              itemBuilder: (context, index) {
+                return HadeethCard(hadith: hadiths[index]);
+              },
+            ),
     );
   }
 }
