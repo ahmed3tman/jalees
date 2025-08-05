@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jalees/core/share/widgets/custom_search_bar.dart';
+import 'package:jalees/core/share/widgets/gradient_background.dart';
 import 'package:jalees/features/bukhari/view/screens/hadeeth_list_screen.dart';
 import '../../cubit/bukhari_cubit.dart';
 
@@ -18,11 +19,8 @@ class _BukhariScreenState extends State<BukhariScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => BukhariCubit()..loadBukhari(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('أحاديث البخاري'),
-          centerTitle: true,
-        ),
+      child: GradientScaffold(
+        appBar: AppBar(title: const Text('أحاديث البخاري'), centerTitle: true),
         body: Column(
           children: [
             CustomSearchBar(
@@ -54,7 +52,7 @@ class _BukhariScreenState extends State<BukhariScreen> {
                         return Card(
                           margin: const EdgeInsets.symmetric(
                             vertical: 8,
-                            horizontal: 12,
+                            horizontal: 16,
                           ),
                           child: ListTile(
                             title: Text(
@@ -62,10 +60,7 @@ class _BukhariScreenState extends State<BukhariScreen> {
                               textDirection: TextDirection.rtl,
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
-                            subtitle: Text(
-                              chapter.english,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
+
                             onTap: () {
                               final hadiths = state.book.hadiths
                                   .where((h) => h.chapterId == chapter.id)
@@ -96,4 +91,3 @@ class _BukhariScreenState extends State<BukhariScreen> {
     );
   }
 }
-

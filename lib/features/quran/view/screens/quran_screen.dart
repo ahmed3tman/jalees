@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jalees/core/share/widgets/custom_search_bar.dart';
+import 'package:jalees/core/share/widgets/gradient_background.dart';
 import 'package:jalees/features/quran/view/widgets/sura_card.dart';
 import '../../cubit/quran_cubit.dart';
 import '../../cubit/quran_state.dart';
@@ -19,11 +20,8 @@ class _QuranScreenState extends State<QuranScreen> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => QuranCubit()..loadQuran(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('القرآن الكريم'),
-          centerTitle: true,
-        ),
+      child: GradientScaffold(
+        appBar: AppBar(title: const Text('القرآن الكريم')),
         body: Column(
           children: [
             CustomSearchBar(
@@ -61,4 +59,3 @@ class _QuranScreenState extends State<QuranScreen> {
     );
   }
 }
-

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/share/widgets/decorated_verse_number.dart';
+import '../../../../core/theme/app_fonts.dart';
 import '../../model/quran_model.dart';
 
 class AyatScreen extends StatelessWidget {
@@ -8,94 +10,156 @@ class AyatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F1E1), // بيج فاتح
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(
           surah.name,
-          style: const TextStyle(
-            color: Color(0xFF8B6F43), // بني/ذهبي غامق
-            fontWeight: FontWeight.bold,
+          style: AppFonts.suraNameStyle(
             fontSize: 24,
-            fontFamily: 'UthmanicHafs', // خط عثماني رسمي
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
-        backgroundColor: const Color(0xFFF7F1E1),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF8B6F43)),
-        // ...existing code...
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        elevation: 2,
+        iconTheme: IconThemeData(color: Theme.of(context).colorScheme.primary),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: RichText(
-              textAlign: TextAlign.justify, // ضبط النص مثل المصحف
-              text: TextSpan(
-                style: const TextStyle(
-                  fontSize: 32, // حجم كبير وواضح
-                  height: 1.7, // ارتفاع سطر أنيق
-                  color: Color(0xFF8B6F43), // بني/ذهبي غامق
-                  fontFamily: 'UthmanicHafs', // الخط العثماني الرسمي
-                ),
-                children: [
-                  for (final verse in surah.verses) ...[
-                    TextSpan(text: verse.text),
-                    // دائرة رقم الآية بتصميم أقرب للمصحف
-                    WidgetSpan(
-                      alignment: PlaceholderAlignment.middle,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        width: 30,
-                        height: 30,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: const Color(0xFFFFF8DC), // ذهبي فاتح جدًا
-                          border: Border.all(
-                            color: const Color(0xFFBFA046), // ذهبي هادئ
-                            width: 2.2,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Theme.of(context).colorScheme.background,
+              Theme.of(context).colorScheme.surface,
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.only(left: 10, right: 10, bottom: 20),
+          child: Column(
+            children: [
+              // نص السورة
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      // بسملة مزخرفة
+                      if (surah.id != 1 &&
+                          surah.id != 9) // ليس الفاتحة أو التوبة
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+                            textAlign: TextAlign.center,
+                            style: AppFonts.basmalahStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            textDirection: TextDirection.rtl,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.brown.withOpacity(0.13),
-                              blurRadius: 5,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
                         ),
-                        child: Center(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              '${verse.id}',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                color: Color(0xFFB28B00), // رقم ذهبي
-                                // fontWeight: FontWeight.bold,
-                                fontFamily: 'UthmanicHafs', // خط عثماني Hafs
-                                // letterSpacing: ,
-                                shadows: [
-                                  Shadow(
-                                    color: Color(0xFFBFA046),
-                                    blurRadius: 2,
-                                    offset: Offset(0, 1),
-                                  ),
-                                ],
-                              ),
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: RichText(
+                          textAlign: TextAlign.justify,
+                          text: TextSpan(
+                            style: AppFonts.quranTextStyle(
+                              color: Theme.of(context).colorScheme.onBackground,
                             ),
+                            children: [
+                              for (final verse in surah.verses) ...[
+                                TextSpan(text: verse.text),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: UnicodeDecoratedVerseNumber(
+                                      verseNumber: verse.id,
+                                      fontSize: 30,
+                                    ),
+                                  ),
+                                ),
+                                const TextSpan(
+                                  text: ' ',
+                                ), // مسافة بعد رقم الآية
+                              ],
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                    // لا يوجد مسافة بعد رقم الآية
-                  ],
-                ],
+                    ],
+                  ),
+                ),
               ),
-            ),
+
+              // معلومات السورة في الأسفل
+              Container(
+                margin: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 15,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildSurahInfo(
+                      context,
+                      'عدد الآيات',
+                      surah.totalVerses.toString(),
+                    ),
+                    Container(
+                      width: 1,
+                      height: 30,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.3),
+                    ),
+                    _buildSurahInfo(
+                      context,
+                      'النوع',
+                      surah.type == "meccan" ? "مكية" : "مدنية",
+                    ),
+                    Container(
+                      width: 1,
+                      height: 30,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.3),
+                    ),
+                    _buildSurahInfo(context, 'رقم السورة', surah.id.toString()),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSurahInfo(BuildContext context, String label, String value) {
+    return Column(
+      children: [
+        const SizedBox(height: 4),
+        Text(label, style: AppFonts.captionStyle(fontSize: 12)),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: AppFonts.generalTextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+      ],
     );
   }
 }

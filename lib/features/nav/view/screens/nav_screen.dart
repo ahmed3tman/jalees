@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jalees/core/share/widgets/gradient_background.dart';
 import 'package:jalees/features/quran/view/screens/quran_screen.dart';
 import 'package:jalees/features/bukhari/view/screens/bukhari_screen.dart';
 import 'package:jalees/features/azkar/view/screens/azkar_screen.dart';
@@ -47,89 +48,153 @@ class _NavState extends State<Nav> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scrollInfo) {
-                if (scrollInfo is ScrollUpdateNotification) {
-                  if (scrollInfo.scrollDelta != null &&
-                      scrollInfo.metrics.pixels >= 0 &&
-                      scrollInfo.metrics.pixels <=
-                          scrollInfo.metrics.maxScrollExtent &&
-                      !scrollInfo.metrics.outOfRange) {
-                    if (scrollInfo.scrollDelta! > 0) {
-                      _scrollDistance += scrollInfo.scrollDelta!;
-                      _upScrollDistance = 0.0;
-                      if (_scrollDistance > 100 && _isBottomBarVisible) {
-                        setState(() {
-                          _isBottomBarVisible = false;
-                        });
-                      }
-                    } else if (scrollInfo.scrollDelta! < 0) {
-                      _upScrollDistance += scrollInfo.scrollDelta!.abs();
-                      if (_upScrollDistance > 30 && !_isBottomBarVisible) {
-                        setState(() {
-                          _isBottomBarVisible = true;
-                        });
+    return GradientBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (scrollInfo) {
+                  if (scrollInfo is ScrollUpdateNotification) {
+                    if (scrollInfo.scrollDelta != null &&
+                        scrollInfo.metrics.pixels >= 0 &&
+                        scrollInfo.metrics.pixels <=
+                            scrollInfo.metrics.maxScrollExtent &&
+                        !scrollInfo.metrics.outOfRange) {
+                      if (scrollInfo.scrollDelta! > 0) {
+                        _scrollDistance += scrollInfo.scrollDelta!;
                         _upScrollDistance = 0.0;
+                        if (_scrollDistance > 100 && _isBottomBarVisible) {
+                          setState(() {
+                            _isBottomBarVisible = false;
+                          });
+                        }
+                      } else if (scrollInfo.scrollDelta! < 0) {
+                        _upScrollDistance += scrollInfo.scrollDelta!.abs();
+                        if (_upScrollDistance > 30 && !_isBottomBarVisible) {
+                          setState(() {
+                            _isBottomBarVisible = true;
+                          });
+                          _upScrollDistance = 0.0;
+                        }
+                        _scrollDistance = 0.0;
                       }
-                      _scrollDistance = 0.0;
                     }
                   }
-                }
-                return false;
-              },
-              child: IndexedStack(index: _currentIndex, children: _screens),
+                  return false;
+                },
+                child: IndexedStack(index: _currentIndex, children: _screens),
+              ),
+            ),
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              bottom: _isBottomBarVisible ? 20 : -100,
+              left: MediaQuery.of(context).size.width * 0.04,
+              right: MediaQuery.of(context).size.width * 0.04,
+              child: Container(
+                height: 80,
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondary.withOpacity(0.2),
+                    width: 1,
+                  ),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withOpacity(0.95),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: TabBar(
+                  indicatorPadding: const EdgeInsets.all(6),
+                  controller: _tabController,
+                  onTap: _onTabTapped,
+                  indicator: BoxDecoration(
+                    color: Colors.white.withOpacity(
+                      0.2,
+                    ), // خلفية أفتح للأيقونة المفعلة
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white.withOpacity(
+                    0.4,
+                  ), // أبيض باهت
+                  labelStyle: const TextStyle(
+                    fontFamily: 'GeneralFont',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 11, // زيادة حجم النص
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontFamily: 'GeneralFont',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 10, // زيادة حجم النص
+                  ),
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  splashFactory: NoSplash.splashFactory,
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  dividerColor: Colors.transparent,
+                  tabs: [
+                    _buildTab('assets/icons/quran.png', 'القرآن', 0),
+                    _buildTab('assets/icons/hadeeth.png', 'أحاديث', 1),
+                    _buildTab('assets/icons/azkar.png', 'أذكار', 2),
+                    _buildTab('assets/icons/calendar.png', 'جدولي', 3),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTab(String iconPath, String label, int index) {
+    final isSelected = _currentIndex == index;
+    return Tab(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(1),
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  isSelected
+                      ? Colors
+                            .white // أبيض نقي للمفعل
+                      : Colors.white.withOpacity(
+                          0.4,
+                        ), // أبيض باهت لغير المفعل
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  iconPath,
+                  width: isSelected ? 26 : 24, // زيادة حجم الأيقونة
+                  height: isSelected ? 26 : 24, // زيادة حجم الأيقونة
+                  fit: BoxFit.contain,
+                ),
+              ),
             ),
           ),
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            bottom: _isBottomBarVisible ? 30 : -100,
-            left: MediaQuery.of(context).size.width * 0.05,
-            right: MediaQuery.of(context).size.width * 0.05,
-            child: Container(
-              height: 65,
-              decoration: BoxDecoration(
-                color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                    spreadRadius: 0,
-                  ),
-                ],
+          const SizedBox(height: 4), // زيادة المسافة بين الأيقونة والنص
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'GeneralFont',
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                fontSize: isSelected ? 11 : 10, // زيادة حجم النص قليلاً
+                color: isSelected
+                    ? Colors
+                          .white // أبيض نقي للمفعل
+                    : Colors.white.withOpacity(0.4), // أبيض باهت لغير المفعل
               ),
-              child: TabBar(
-                controller: _tabController,
-                onTap: _onTabTapped,
-                indicator: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                labelColor: Theme.of(context).bottomNavigationBarTheme.selectedItemColor,
-                unselectedLabelColor: Theme.of(context).bottomNavigationBarTheme.unselectedItemColor,
-                indicatorSize: TabBarIndicatorSize.tab,
-                splashFactory: NoSplash.splashFactory,
-                overlayColor: WidgetStateProperty.all(Colors.transparent),
-                dividerColor: Colors.transparent,
-                tabs: const [
-                  Tab(icon: Icon(Icons.menu_book, size: 22), text: 'القرآن'),
-                  Tab(
-                    icon: Icon(Icons.book_outlined, size: 22),
-                    text: 'أحاديث',
-                  ),
-                  Tab(icon: Icon(Icons.auto_awesome, size: 22), text: 'أذكار'),
-                  Tab(
-                    icon: Icon(Icons.calendar_month, size: 22),
-                    text: 'جدولي',
-                  ),
-                ],
-              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
