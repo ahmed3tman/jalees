@@ -1,14 +1,53 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jalees/features/azkar/cubit/azkar_cubit.dart';
 import 'package:jalees/features/azkar/model/azkar_model.dart';
 import '../../../../core/theme/app_fonts.dart';
 
-class AzkarCard extends StatelessWidget {
+class AzkarCard extends StatefulWidget {
   final AzkarModel azkarModel;
-
   const AzkarCard({super.key, required this.azkarModel});
 
   @override
+  State<AzkarCard> createState() => _AzkarCardState();
+}
+
+class _AzkarCardState extends State<AzkarCard> {
+  late final AzkarCubit _cubit;
+  int? _remaining;
+
+  @override
+  void initState() {
+    super.initState();
+    _cubit = context.read<AzkarCubit>();
+    _remaining = _cubit.getRemainingFor(widget.azkarModel);
+  }
+
+  @override
+  void didUpdateWidget(covariant AzkarCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.azkarModel.zekr != widget.azkarModel.zekr ||
+        oldWidget.azkarModel.category != widget.azkarModel.category ||
+        oldWidget.azkarModel.count != widget.azkarModel.count) {
+      _remaining = _cubit.getRemainingFor(widget.azkarModel);
+    }
+  }
+
+  void _decrement() {
+    if (_remaining == null) return;
+    if (_remaining! > 0) {
+      setState(() {
+        _remaining = _remaining! - 1;
+        _cubit.setRemainingFor(widget.azkarModel, _remaining!);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final total = widget.azkarModel.count ?? 0;
+    final isCompleted = (_remaining ?? total) == 0 && total > 0;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       elevation: 3,
@@ -34,18 +73,22 @@ class AzkarCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.primary.withOpacity(0.05),
+                  color: (isCompleted
+                      ? Colors.green.withOpacity(0.07)
+                      : Theme.of(
+                          context,
+                        ).colorScheme.primary.withOpacity(0.05)),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withOpacity(0.1),
+                    color:
+                        (isCompleted
+                                ? Colors.green
+                                : Theme.of(context).colorScheme.primary)
+                            .withOpacity(0.1),
                   ),
                 ),
                 child: Text(
-                  azkarModel.zekr ?? '',
+                  widget.azkarModel.zekr ?? '',
                   textDirection: TextDirection.rtl,
                   style: AppFonts.azkarTextStyle(
                     color: Theme.of(context).colorScheme.onBackground,
@@ -57,8 +100,8 @@ class AzkarCard extends StatelessWidget {
               const SizedBox(height: 16),
 
               // الوصف إن وجد
-              if (azkarModel.description != null &&
-                  azkarModel.description!.isNotEmpty) ...[
+              if (widget.azkarModel.description != null &&
+                  widget.azkarModel.description!.isNotEmpty) ...[
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -68,7 +111,7 @@ class AzkarCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    azkarModel.description!,
+                    widget.azkarModel.description!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       fontStyle: FontStyle.italic,
                       color: Theme.of(
@@ -81,11 +124,91 @@ class AzkarCard extends StatelessWidget {
                 const SizedBox(height: 16),
               ],
 
-              // معلومات إضافية
+              // الشريط السفلي: العداد على اليسار والراوي ثابت على اليمين
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (azkarModel.count != null)
+                  if (total > 0)
+                    InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: _decrement,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: isCompleted
+                              ? Colors.green.withOpacity(0.10)
+                              : Theme.of(
+                                  context,
+                                ).colorScheme.primary.withOpacity(0.10),
+                          border: Border.all(
+                            color: isCompleted
+                                ? Colors.green.shade400
+                                : Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // دائرة تقدم حول أيقونة الإصبع
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    value: total == 0
+                                        ? 0
+                                        : ((total - (_remaining ?? total)) /
+                                                  total)
+                                              .clamp(0.0, 1.0),
+                                    strokeWidth: 2.5,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withOpacity(0.2),
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      isCompleted
+                                          ? Colors.green.shade400
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.touch_app_rounded,
+                                  size: 14,
+                                  color: isCompleted
+                                      ? Colors.green.shade400
+                                      : Theme.of(context).colorScheme.primary,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              isCompleted
+                                  ? 'تمت القراءة'
+                                  : 'متبقي: ${_remaining ?? total}',
+                              style: Theme.of(context).textTheme.labelLarge
+                                  ?.copyWith(
+                                    color: isCompleted
+                                        ? Colors.green.shade600
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  if (widget.azkarModel.reference != null &&
+                      widget.azkarModel.reference!.isNotEmpty)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -94,69 +217,34 @@ class AzkarCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Theme.of(
                           context,
-                        ).colorScheme.secondary.withOpacity(0.2),
+                        ).colorScheme.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            Icons.repeat,
+                            Icons.source_outlined,
                             size: 16,
-                            color: Theme.of(context).colorScheme.secondary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            'التكرار: ${azkarModel.count}',
-                            style: Theme.of(context).textTheme.labelLarge
-                                ?.copyWith(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.secondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 220),
+                            child: Text(
+                              widget.azkarModel.reference!,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ],
-                      ),
-                    ),
-                  if (azkarModel.reference != null &&
-                      azkarModel.reference!.isNotEmpty)
-                    Flexible(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.source_outlined,
-                              size: 16,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                azkarModel.reference!,
-                                style: Theme.of(context).textTheme.labelMedium
-                                    ?.copyWith(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
                       ),
                     ),
                 ],

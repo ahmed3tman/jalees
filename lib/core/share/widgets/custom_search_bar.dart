@@ -3,17 +3,21 @@ import 'package:flutter/material.dart';
 class CustomSearchBar extends StatelessWidget {
   final String hintText;
   final ValueChanged<String> onChanged;
+  final EdgeInsetsGeometry? margin;
 
   const CustomSearchBar({
     super.key,
     required this.hintText,
     required this.onChanged,
+    this.margin,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      margin:
+          margin ??
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
       child: TextField(
         onChanged: onChanged,
