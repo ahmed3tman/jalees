@@ -124,8 +124,12 @@ class _AzkarCardState extends State<AzkarCard> {
                 const SizedBox(height: 16),
               ],
 
-              // الشريط السفلي: العداد على اليسار والراوي ثابت على اليمين
-              Row(
+              // الشريط السفلي: العداد على اليسار والراوي ثابت على اليمين (معالجة الأوفر فلو)
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.spaceBetween,
                 children: [
                   if (total > 0)
                     InkWell(
@@ -206,7 +210,6 @@ class _AzkarCardState extends State<AzkarCard> {
                         ),
                       ),
                     ),
-                  const Spacer(),
                   if (widget.azkarModel.reference != null &&
                       widget.azkarModel.reference!.isNotEmpty)
                     Container(
@@ -229,8 +232,8 @@ class _AzkarCardState extends State<AzkarCard> {
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           const SizedBox(width: 4),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 220),
+                          // اجعل النص مرنًا لتقليصه وإضافة الحذف عند الضيق
+                          Flexible(
                             child: Text(
                               widget.azkarModel.reference!,
                               style: Theme.of(context).textTheme.labelMedium
@@ -242,6 +245,7 @@ class _AzkarCardState extends State<AzkarCard> {
                                   ),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
+                              softWrap: false,
                             ),
                           ),
                         ],
